@@ -603,20 +603,23 @@ import net.zettadata.generator.tools.ToolboxException;
 	"</genre>"|"</mods:genre>"
 	{
 		String genre = tmp.toString().toLowerCase() ;
-		cblock.setType( authority, genre ) ;
-    	String type =  Singleton.getInstance().getManifestationType( genre ) ;
-    	if ( type != null )
-    	{
-    		if ( tmpManifestation == null )
+		if ( !"[null]".equals( genre ) )
+		{
+			cblock.setType( authority, genre ) ;
+    		String type =  Singleton.getInstance().getManifestationType( genre ) ;
+    		if ( type != null )
     		{
-    			tmpManifestation = new Manifestation() ;
+    			if ( tmpManifestation == null )
+    			{
+    				tmpManifestation = new Manifestation() ;
+    			}
+    			tmpManifestation.setManifestationType( type ) ;
     		}
-    		tmpManifestation.setManifestationType( type ) ;
-    	}
-    	String status = Singleton.getInstance().getPublicationStatus( genre ) ;
-    	if ( status != null )
-    	{
-    		expression.setPublicationStatus( modsVersion, status ) ;
+    		String status = Singleton.getInstance().getPublicationStatus( genre ) ;
+    		if ( status != null )
+    		{
+    			expression.setPublicationStatus( modsVersion, status ) ;
+    		}
     	}
 		yybegin( AGRIF ) ;
 	}
@@ -656,6 +659,11 @@ import net.zettadata.generator.tools.ToolboxException;
 	}
 	
 	"<dateIssued encoding=\"iso8601\">".+"</dateIssued>"|"<mods:dateIssued encoding=\"iso8601\">".+"</mods:dateIssued>"
+	{
+		publisher.setDate( extract( yytext() ) ) ;
+	}
+	
+	"<dateIssued>".+"</dateIssued>"|"<mods:dateIssued>".+"</mods:dateIssued>"
 	{
 		publisher.setDate( extract( yytext() ) ) ;
 	}
@@ -833,6 +841,18 @@ import net.zettadata.generator.tools.ToolboxException;
 		manifestation.setManifestationType( "fullText" ) ;
 		expression.setManifestation( manifestation ) ;
 	}
+	
+	"<url displayLabel=\"electronic resource\" usage=\"primary display\">".+"</url>"|"<mods:url displayLabel=\"electronic resource\" usage=\"primary display\">".+"</mods:url>"
+	{
+		item = new Item() ;
+		item.setDigitalItem( extract( yytext() ) ) ;
+		manifestation = new Manifestation() ;
+		manifestation.setItem( item ) ;
+		manifestation.setManifestationType( "fullText" ) ;
+		expression.setManifestation( manifestation ) ;	
+	}
+	
+	
 }
 
 <LANGUAGE>
